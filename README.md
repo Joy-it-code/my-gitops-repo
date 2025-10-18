@@ -268,7 +268,7 @@ kubectl --context kind-cluster-app get nodes
 kubectl create namespace argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 ```
-![](./img/1a.create.namespace.png)
+
 
 
 
@@ -311,8 +311,8 @@ argocd account update-password --current-password <the-initial-password> --new-p
 git init
 git add .
 git commit -m "Initial GitOps commit with ArgoCD setup"
-git remote add origin https://github.com/username/repo.git
 git branch -M main
+git remote add origin https://github.com/username/repo.git
 git push -u origin main
 ```
 
