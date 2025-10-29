@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: microservice-1
-          image: nginx:latest
+          image: joanna2/microservice-1:latest
           ports:
-            - containerPort: 80
+            - containerPort: 3000

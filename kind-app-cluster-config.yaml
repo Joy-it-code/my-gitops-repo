@@ -1,0 +1,9 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: kind-cluster-app
+networking:
+  apiServerAddress: "192.168.0.135"
+  apiServerPort: 6446
+nodes:
+  - role: control-plane
+  - role: worker

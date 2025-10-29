@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: microservice-2
-          image: httpd:latest
+          image: joanna2/microservice-2:latest
           ports:
-            - containerPort: 80
+            - containerPort: 3000
