@@ -1,16 +1,15 @@
-# Overview
+# ArgoCD GitOps Project
 
-This project is designed as a hands-on learning and reference guide for developers and DevOps engineers exploring GitOps workflows with ArgoCD.
+## Overview
 
-In this repo, I will:
+GitOps is a modern approach to Continuous Deployment (CD) where Git serves as the **single source of truth** for both application and infrastructure definitions.
 
-- Learn how to set up multiple Kubernetes clusters (management + application).
-
-- Deploy and manage multiple microservices through ArgoCD.
-
-- Integrate CI/CD pipelines via GitHub Actions for automated image builds and manifest updates.
-
-- Securely manage secrets using Bitnami Sealed Secrets.
+In this project:
+- I used **Kind** to create two local Kubernetes clusters:
+  - A **Management Cluster** hosting ArgoCD.
+  - An **Application Cluster** hosting the deployed microservices.
+- I used **ArgoCD** to automatically synchronize deployments from a Git repository.
+- I containerized and deploy two sample microservices (e.g., `service-1` and `service-2`) built with Node.js.
 
 
 ## Architecture Overview
@@ -546,7 +545,7 @@ CMD ["node", "index.js"]
 ### Build and Test Locally
 ```bash
 docker build -t username/microservice-1:latest .
-docker run -p 3000:3000 joynw/microservice-1:latest
+docker run -p 3000:3000 username/microservice-1:latest
 ```
 **Then visit `http://localhost:3000`**
 ![](./img/4a.microser.1.png)
@@ -561,9 +560,75 @@ docker login
 ### Tag and for Docker Hub Push
 ```bash
 docker images
-docker tag username/microservice-1:latest joanna2/microservice-1:latest .
-docker run -p 3001:3000 joanna2/microservice-2:latest
+docker tag username/microservice-1:latest username/microservice-1:latest .
+docker run -p 3001:3000 username/microservice-2:latest
 docker push username/microservice-1:latest
 ```
-**visit:http://localhost:3001**
+**visit:`http://localhost:3001`**
 **Repeat for microservice 2**
+![](./img/4b.microsr2.png)
+
+
+
+### Cleanup
+
+#### Delete all clusters
+```bash
+kind delete cluster --name kind-cluster-app
+kind delete cluster --name kind-cluster-management
+for cluster in $(kind get clusters); do kind delete cluster --name $cluster; done
+docker volume prune -f
+```
+
+
+### Verify cleanup
+```bash
+kind get clusters
+docker ps
+docker network ls | grep kind
+```
+
+
+
+### Challenges and Solutions
+
+
+| **Challenge** | **Description** | **Solution** |
+|----------------|-----------------|---------------|
+| Cluster Connection Issues | `argocd cluster add` failed due to wrong localhost mapping. | Updated kubeconfig to use the correct IP and ports (e.g., `127.0.0.1:6446`). |
+| TLS Certificate Error | Kind cluster certificates were not valid for external IPs. | Used `0.0.0.0` or regenerated cluster with matching IP. |
+| ArgoCD Access Problems | UI inaccessible on Windows Git Bash. | Used port forwarding and accessed via browser at [`https://localhost:8080`](https://localhost:8080). |
+| Leaked Secret Detected by GitGuardian | An accidental Base64-encoded key was pushed. | Rotated keys, scrubbed repo history using **BFG Repo-Cleaner**, and re-pushed clean state. |
+| Microservices Duplication | Two instances created by Kind config. | Rechecked Kind YAMLs and removed duplicate worker definitions. |
+
+
+
+
+### Lessons Learned
+
+Always validate cluster contexts and kubeconfigs before linking ArgoCD.
+
+Keep secrets out of Git — use Kubernetes secrets or GitOps vault integrations.
+
+Declarative infrastructure helps trace every change through Git.
+
+ArgoCD’s visual dashboard simplifies debugging and sync operations.
+
+
+
+### Conclusion
+
+This project successfully demonstrates a complete GitOps workflow with local clusters using Kind, automated deployments with ArgoCD, and containerized Node.js microservices.
+It reinforces the importance of automation, reproducibility, and version control in modern DevOps practices.
+
+By integrating ArgoCD with Kind, I achieve a lightweight yet powerful environment for experimenting with Continuous Deployment, infrastructure as code, and multi-cluster orchestration, all reproducible from Git.
+
+
+
+### Author
+
+#### Joy Nwatuzor
+
+- **Github:** Joy-it-code
+
+- **DevOps Engineer in training** — mastering GitOps, ArgoCD, Kubernetes & automation.

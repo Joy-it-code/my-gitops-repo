@@ -1,0 +1,12 @@
+*.pem
+*.key
+*.env
+*.pub
+*.crt
+id_rsa
+node_modules
+- "**/package-lock.json"
+*.crt
+*.package-lock
+*.app-kubeconfig.yaml
+config.json
